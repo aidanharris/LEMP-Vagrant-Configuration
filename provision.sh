@@ -1,3 +1,4 @@
+#!/bin/bash
 export DEBIAN_FRONTEND=noninteractive
 
 echo "Updating System Repositories..."
@@ -13,11 +14,15 @@ sudo locale-gen &> /dev/null 2>&1
 
 sudo sed -i "s/LANG=\"en_US.UTF-8\"/LANG=\"$LOCALE\"/g" /etc/default/locale &> /dev/null 2>&1
 
-echo "Upgrading Software (this might take a while)..."
-sudo apt-get upgrade -y -qq &> /dev/null 2>&1
-sudo apt-get dist-upgrade -y -qq &> /dev/null 2>&1
-sudo apt-get autoremove -y -qq &> /dev/null 2>&1
-
+#Set VAGRANT_SKIP_UPGRADE To skip upgrades - useful for quickly testing stuff
+#VAGRANT_SKIP_UPGRADE=""
+if [ -z "${VAGRANT_SKIP_UPGRADE+x}"]
+then
+  echo "Upgrading Software (this might take a while)..."
+  sudo apt-get upgrade -y -qq &> /dev/null 2>&1
+  sudo apt-get dist-upgrade -y -qq &> /dev/null 2>&1
+  sudo apt-get autoremove -y -qq &> /dev/null 2>&1
+fi
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password root' &> /dev/null 2>&1
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password root' &> /dev/null 2>&1
 
@@ -35,6 +40,20 @@ sudo apt-get install -y -f php5-fpm php5-cgi php5-common php5-cli nginx nginx-co
 update-rc.d nginx defaults  &> /dev/nul 2>&1 #Enable nginx
 update-rc.d mysql defaults &> /dev/null 2>&1 #Enable mysql server
 
+#Set mariadb to listen on all interfaces (0.0.0.0)
+sudo sed -i "s/bind-address\t\t= 127.0.0.1/bind-address\t\t= 0.0.0.0/g" /etc/mysql/my.cnf
+sudo mysql -u root --password=root --execute="GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.99.%' IDENTIFIED BY 'root' WITH GRANT OPTION;"
+sudo service mysql restart
+
+#Install phpmyadmin - Thanks StackOverflow (https://stackoverflow.com/questions/22440298/preseeding-phpmyadmin-skip-multiselect-skip-password)
+sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect none'
+sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/dbconfig-install boolean true'
+sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-user string root'
+sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password root'
+sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password root'
+sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/app-password-confirm password root'
+sudo apt-get install -y -qq phpmyadmin &> /dev/null 2>&1
+
 #Install Composer PHP dependancy manager
 curl -sS https://getcomposer.org/installer | php &> /dev/null 2>&1
 sudo mv composer.phar /usr/local/bin/composer &> /dev/null 2>&1
@@ -44,12 +63,13 @@ sudo rm -rf /usr/share/nginx &> /dev/null 2>&1
 sudo rm -rf /etc/nginx &> /dev/null 2>&1
 
 sudo ln -fs /vagrant/www /usr/share/nginx &> /dev/null 2>&1
+sudo ln -fs /usr/share/phpmyadmin /usr/share/nginx/ &> /dev/null 2>&1
 sudo ln -fs /vagrant/etc/nginx /etc/nginx &> /dev/null 2>&1
 sudo mkdir -p /etc/nginx/sites-enabled &> /dev/null 2>&1
 sudo ln -fs /vagrant/etc/nginx/sites-available/default /etc/nginx/sites-enabled/ &> /dev/null 2>&1
 
 echo "Restarting PHP and Nginx..."
-
+sudo php5enmod mcrypt
 sudo service php5-fpm restart
 sudo service nginx restart
 
