@@ -33,10 +33,15 @@ sudo su vagrant -c 'curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/mas
 
 sudo add-apt-repository -y ppa:ondrej/php &> /dev/null 2>&1
 sudo apt-get update -qq &> /dev/null 2>&1
-sudo apt-get upgrade -qq &> /dev/null 2>&1
+if [ -z "${VAGRANT_SKIP_UPGRADE+x}"]
+then
+  sudo apt-get upgrade -qq &> /dev/null 2>&1
+fi
+
+echo "Installing LEMP Stack..."
 
 #Install LEMP Stack
-sudo apt-get install -y -f php5.6-fpm php5.6-cgi php5.6-common php5.6-cli nginx nginx-common php5.6-curl php5.6-gd php5.6-mcrypt php5.6-readline mariadb-server php5.6-mysql git-core php5.6-xdebug &> /dev/null 2>&1
+sudo apt-get install -y -f php-mbstring php-gettext php5.6-mbstring php5.6-gettext php5.6-fpm php5.6-cgi php5.6-common php5.6-cli nginx nginx-common php5.6-curl php5.6-gd php5.6-mcrypt php5.6-readline mariadb-server php5.6-mysql git-core php5.6-xdebug &> /dev/null 2>&1
 
 update-rc.d nginx defaults  &> /dev/nul 2>&1 #Enable nginx
 update-rc.d mysql defaults &> /dev/null 2>&1 #Enable mysql server
@@ -65,6 +70,7 @@ sudo rm -rf /etc/nginx &> /dev/null 2>&1
 
 sudo ln -fs /vagrant/www /usr/share/nginx &> /dev/null 2>&1
 sudo ln -fs /usr/share/phpmyadmin /usr/share/nginx/ &> /dev/null 2>&1
+sudo ln -fs /usr/share/nginx/phpmyadmin /usr/share/nginx/html &> /dev/null 2>&1
 sudo ln -fs /vagrant/etc/nginx /etc/nginx &> /dev/null 2>&1
 sudo mkdir -p /etc/nginx/sites-enabled &> /dev/null 2>&1
 sudo ln -fs /vagrant/etc/nginx/sites-available/default /etc/nginx/sites-enabled/ &> /dev/null 2>&1
