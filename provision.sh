@@ -31,11 +31,11 @@ sudo apt-get install -y -qq zsh vim git curl wget python-software-properties &> 
 #Set the default shell to zsh and change the zsh theme to agnoster
 sudo su vagrant -c 'curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh > install.sh && sudo chmod +x install.sh && sed -i "s/chsh -s/sudo chsh -s/g" "/home/$(whoami)/install.sh" && sed -i "s/env zsh/\#env zsh/g" "/home/$(whoami)/install.sh" && /home/$(whoami)/install.sh && sed -i "s/ZSH_THEME=\"robbyrussell\"/ZSH_THEME=\"agnoster\"/g" "/home/$(whoami)/.zshrc" && rm -rf "/home/$(whoami)/install.sh" && sudo chsh $(whoami) -s /usr/bin/zsh && sudo ln -s /home/$(whoami)/.oh-my-zsh /root && sudo ln -s /home/$(whoami)/.zshrc /root' &> /dev/null 2>&1
 
-sudo add-apt-repository -y ppa:ondrej/php5 &> /dev/null 2>&1
+sudo add-apt-repository -y ppa:ondrej/php &> /dev/null 2>&1
 sudo apt-get update -qq &> /dev/null 2>&1
 
 #Install LEMP Stack
-sudo apt-get install -y -f php5-fpm php5-cgi php5-common php5-cli nginx nginx-common php5-curl php5-gd php5-mcrypt php5-readline mariadb-server php5-mysql git-core php5-xdebug &> /dev/null 2>&1
+sudo apt-get install -y -f php5.6-fpm php5.6-cgi php5.6-common php5.6-cli nginx nginx-common php5.6-curl php5.6-gd php5.6-mcrypt php5.6-readline mariadb-server php5.6-mysql git-core php5.6-xdebug &> /dev/null 2>&1
 
 update-rc.d nginx defaults  &> /dev/nul 2>&1 #Enable nginx
 update-rc.d mysql defaults &> /dev/null 2>&1 #Enable mysql server
@@ -70,7 +70,7 @@ sudo ln -fs /vagrant/etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 
 echo "Restarting PHP and Nginx..."
 sudo php5enmod mcrypt
-sudo service php5-fpm restart
+sudo service php5.6-fpm restart
 sudo service nginx restart
 
 echo "Setup Complete\!"
