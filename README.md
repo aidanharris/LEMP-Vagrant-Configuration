@@ -8,7 +8,7 @@ The file [services.sh](https://github.com/aidanharris/LEMP-Vagrant-Configuration
 ## Usage
 
 * Install [Vagrant](https://vagrantup.com)
-* Clone this repository (`git clone https://github.com/aidanharris/LEMP-Vagrant-Configuration.git`)
+* Clone this repository (`git clone --depth=1 https://github.com/aidanharris/LEMP-Vagrant-Configuration.git`)
 * Cd into the repository (`cd LEMP-Vagrant-Configuration`)
 * `vagrant up`
 * That's It!
