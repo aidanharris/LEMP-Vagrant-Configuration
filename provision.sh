@@ -49,7 +49,10 @@ update-rc.d mysql defaults &> /dev/null 2>&1 #Enable mysql server
 #Set mariadb to listen on all interfaces (0.0.0.0)
 sudo sed -i "s/bind-address\t\t= 127.0.0.1/bind-address\t\t= 0.0.0.0/g" /etc/mysql/my.cnf
 sudo mysql -u root --password=root --execute="GRANT ALL PRIVILEGES ON *.* TO 'root'@'192.168.99.%' IDENTIFIED BY 'root' WITH GRANT OPTION;"
-sudo service mysql restart
+sudo mysql -u root --password=root --execute="GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY 'root' WITH GRANT OPTION;"
+sudo mysql -u root --password=root --execute="CREATE USER root IDENTIFIED VIA unix_socket;"
+sudo mysql -u root --password=root --execute="GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED VIA unix_socket;"
+sudo systemctl restart mysql
 
 #Install phpmyadmin - Thanks StackOverflow (https://stackoverflow.com/questions/22440298/preseeding-phpmyadmin-skip-multiselect-skip-password)
 sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect none'
@@ -58,6 +61,7 @@ sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-user string r
 sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password root'
 sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password root'
 sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/app-password-confirm password root'
+
 sudo apt-get install -y -qq phpmyadmin &> /dev/null 2>&1
 
 #Install Composer PHP dependancy manager
@@ -77,8 +81,8 @@ sudo ln -fs /vagrant/etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 
 echo "Restarting PHP and Nginx..."
 sudo phpenmod -v ALL mcrypt
-sudo service php5.6-fpm restart
-sudo service nginx restart
+sudo systemctl restart php5.6-fpm
+sudo systemctl restart nginx
 
 echo "Setup Complete\!"
 
