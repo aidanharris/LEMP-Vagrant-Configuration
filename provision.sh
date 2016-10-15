@@ -90,15 +90,16 @@ sudo systemctl restart nginx
 
 echo "Setup Complete\!"
 
-echo "IP Address: $(/sbin/ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')"
+IP="$(/sbin/ifconfig enp0s8 | grep 'inet ' | awk '{ print $2}')"
+echo "IP Address: $IP"
 
 echo "Add this line to your hosts file (either /etc/hosts or %WINDIR%\System32\drivers\etc\hosts on Windows) to access the box via hostname"
 
-echo "$(/sbin/ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')    hostname"
+echo "$IP    hostname"
 
 echo "You can do this with bash (to check if you have bash installed simply run 'bash --version') as follows:"
 
-echo "sudo bash -c 'printf \"$(/sbin/ifconfig enp0s8 | grep 'inet addr:' | cut -d: -f2 | awk '{ print $1}')    hostname\" >> /etc/hosts'"
+echo "sudo bash -c 'printf \"$IP   hostname\" >> /etc/hosts'"
 
 echo "You can do this automatically via the vagrant-hostmanager plugin (see: https://github.com/smdahlen/vagrant-hostmanager)"
 
