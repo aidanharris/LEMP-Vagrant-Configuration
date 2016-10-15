@@ -62,7 +62,11 @@ sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/admin-pass password
 sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/mysql/app-pass password root'
 sudo debconf-set-selections <<< 'phpmyadmin phpmyadmin/app-password-confirm password root'
 
-sudo apt-get install -y -qq phpmyadmin &> /dev/null 2>&1
+sudo apt-get install -y -qq --no-install-recommends phpmyadmin &> /dev/null 2>&1
+
+# Fix mysql user / password - This shouldn't be needed since it's done above but for some
+# reason is reset / ignored after installing phpmyadmin
+sudo mysql -u root --password=root --execute="GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' IDENTIFIED BY 'root' WITH GRANT OPTION;"
 
 #Install Composer PHP dependancy manager
 curl -sS https://getcomposer.org/installer | php &> /dev/null 2>&1
